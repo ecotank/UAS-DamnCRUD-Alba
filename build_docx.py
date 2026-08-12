@@ -344,45 +344,61 @@ from selenium.webdriver.common.alert import Alert
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-BASE_URL = os.environ.get("BASE_URL", "http://host.docker.internal:8000")
+BASE_URL = os.environ.get("BASE_URL", "http://127.0.0.1:8000")
 
 def test_tc003_add_new_contact(logged_in_driver):
     driver = logged_in_driver
-    driver.find_element(By.CLASS_NAME, "create-contact").click()
-    time.sleep(1)
+    unique_name = f"AutoContact_{int(time.time())}"
+    
+    add_btn = driver.find_element(By.CLASS_NAME, "create-contact")
+    add_btn.click()
+    WebDriverWait(driver, 5).until(EC.title_contains("Add new contact"))
     assert "Add new contact" in driver.title
     
-    driver.find_element(By.ID, "name").send_keys("Budi Santoso Automation")
-    driver.find_element(By.ID, "email").send_keys("budi.auto@example.com")
+    driver.find_element(By.ID, "name").send_keys(unique_name)
+    driver.find_element(By.ID, "email").send_keys("auto.test@example.com")
     driver.find_element(By.ID, "phone").send_keys("081299887766")
-    driver.find_element(By.ID, "title").send_keys("Cryptographer Tester")
+    driver.find_element(By.ID, "title").send_keys("Automation Tester")
+    
     driver.find_element(By.XPATH, "//input[@type='submit']").click()
-    time.sleep(1)
+    WebDriverWait(driver, 5).until(EC.title_contains("Dashboard"))
     
     assert "Dashboard" in driver.title
     search_input = driver.find_element(By.XPATH, "//input[@type='search']")
-    search_input.send_keys("Budi Santoso Automation")
+    search_input.clear()
+    search_input.send_keys(unique_name)
     time.sleep(0.5)
-    assert "Budi Santoso Automation" in driver.page_source
+    assert unique_name in driver.page_source
 
 def test_tc004_update_contact(logged_in_driver):
     driver = logged_in_driver
-    driver.find_element(By.XPATH, "//a[contains(@href, 'update.php')]").click()
-    time.sleep(1)
+    updated_name = f"UpdatedUser_{int(time.time())}"
+    
+    edit_btn = driver.find_element(By.XPATH, "//a[contains(@href, 'update.php')]")
+    edit_btn.click()
+    WebDriverWait(driver, 5).until(EC.title_contains("Change contact"))
+    assert "Change contact" in driver.title
     
     name_field = driver.find_element(By.ID, "name")
     name_field.clear()
-    name_field.send_keys("John Does Updated")
+    name_field.send_keys(updated_name)
+    
     driver.find_element(By.XPATH, "//input[@type='submit']").click()
-    time.sleep(1)
+    WebDriverWait(driver, 5).until(EC.title_contains("Dashboard"))
     
     assert "Dashboard" in driver.title
-    assert "John Does Updated" in driver.page_source
+    search_input = driver.find_element(By.XPATH, "//input[@type='search']")
+    search_input.clear()
+    search_input.send_keys(updated_name)
+    time.sleep(0.5)
+    assert updated_name in driver.page_source
 
 def test_tc005_delete_contact(logged_in_driver):
     driver = logged_in_driver
     info_before = driver.find_element(By.ID, "employee_info").text
-    driver.find_element(By.XPATH, "//a[contains(@href, 'delete.php')]").click()
+    
+    delete_btn = driver.find_element(By.XPATH, "//a[contains(@href, 'delete.php')]")
+    delete_btn.click()
     time.sleep(0.5)
     
     try:
@@ -394,32 +410,39 @@ def test_tc005_delete_contact(logged_in_driver):
         pass
     
     driver.get(f"{BASE_URL.rstrip('/')}/index.php")
-    time.sleep(1)
+    WebDriverWait(driver, 5).until(EC.title_contains("Dashboard"))
+    
     info_after = driver.find_element(By.ID, "employee_info").text
     assert info_before != info_after
 
 def test_tc006_upload_profile_image(logged_in_driver, tmp_path):
     driver = logged_in_driver
-    driver.find_element(By.XPATH, "//a[contains(@href, 'profil.php')]").click()
-    time.sleep(1)
+    profil_btn = driver.find_element(By.XPATH, "//a[contains(@href, 'profil.php')]")
+    profil_btn.click()
+    WebDriverWait(driver, 5).until(EC.title_contains("Profil"))
+    assert "Profil" in driver.title
     
     sample_jpg = tmp_path / "test_avatar.jpg"
     sample_jpg.write_bytes(b"\\xFF\\xD8\\xFF\\xE0\\x00\\x10JFIF\\x00\\x01\\x01\\x01\\x00`\\x00`\\x00\\x00\\xFF\\xD9")
     
-    driver.find_element(By.ID, "formFile").send_keys(str(sample_jpg))
+    file_input = driver.find_element(By.ID, "formFile")
+    file_input.send_keys(str(sample_jpg))
     driver.find_element(By.XPATH, "//button[@type='submit']").click()
     time.sleep(1)
+    
     assert "Profil" in driver.title
     assert "Ekstensi tidak diijinkan" not in driver.page_source
 
 def test_tc007_vpage_functional_submission(logged_in_driver):
     driver = logged_in_driver
-    driver.find_element(By.XPATH, "//a[contains(@href, 'vpage.php')]").click()
+    vpage_btn = driver.find_element(By.XPATH, "//a[contains(@href, 'vpage.php')]")
+    vpage_btn.click()
     time.sleep(1)
     assert "Dummy Page XSS Detect" in driver.page_source
     
     test_text = "Testing Functional Output"
-    driver.find_element(By.NAME, "thing").send_keys(test_text)
+    thing_input = driver.find_element(By.NAME, "thing")
+    thing_input.send_keys(test_text)
     driver.find_element(By.NAME, "submit").click()
     time.sleep(1)
     assert f"Your thing is {test_text}" in driver.page_source"""
