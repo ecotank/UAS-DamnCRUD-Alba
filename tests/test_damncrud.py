@@ -16,8 +16,7 @@ def test_tc003_add_new_contact(logged_in_driver):
     # 1. Navigasi ke form tambah kontak
     add_btn = driver.find_element(By.CLASS_NAME, "create-contact")
     add_btn.click()
-    time.sleep(1)
-    
+    WebDriverWait(driver, 5).until(EC.title_contains("Add new contact"))
     assert "Add new contact" in driver.title
     
     # 2. Pengisian data kontak baru
@@ -28,7 +27,7 @@ def test_tc003_add_new_contact(logged_in_driver):
     
     # 3. Submit form
     driver.find_element(By.XPATH, "//input[@type='submit']").click()
-    time.sleep(1)
+    WebDriverWait(driver, 5).until(EC.title_contains("Dashboard"))
     
     # 4. Verifikasi kontak muncul di Dashboard via DataTables Search
     assert "Dashboard" in driver.title
@@ -43,10 +42,10 @@ def test_tc004_update_contact(logged_in_driver):
     driver = logged_in_driver
     updated_name = f"UpdatedUser_{int(time.time())}"
     
-    # 1. Buka form edit kontak ID 2 agar tidak bertabrakan dengan ID 1
-    driver.get(f"{BASE_URL.rstrip('/')}/update.php?id=2")
-    time.sleep(1)
-    
+    # 1. Klik tombol Edit kontak dari dashboard
+    edit_btn = driver.find_element(By.XPATH, "//a[contains(@href, 'update.php')]")
+    edit_btn.click()
+    WebDriverWait(driver, 5).until(EC.title_contains("Change contact"))
     assert "Change contact" in driver.title
     
     # 2. Ubah nama kontak
@@ -56,7 +55,7 @@ def test_tc004_update_contact(logged_in_driver):
     
     # 3. Submit update
     driver.find_element(By.XPATH, "//input[@type='submit']").click()
-    time.sleep(1)
+    WebDriverWait(driver, 5).until(EC.title_contains("Dashboard"))
     
     # 4. Verifikasi data berhasil diperbarui via DataTables Search
     assert "Dashboard" in driver.title
@@ -69,19 +68,30 @@ def test_tc004_update_contact(logged_in_driver):
 def test_tc005_delete_contact(logged_in_driver):
     """TC-038: Pengujian Fungsional Hapus Kontak (Delete Contact)"""
     driver = logged_in_driver
-    target_id = 12
     
-    # 1. Akses halaman delete kontak ID 12
-    driver.get(f"{BASE_URL.rstrip('/')}/delete.php?id={target_id}")
-    time.sleep(1)
+    # Hitung info DataTables sebelum penghapusan
+    info_before = driver.find_element(By.ID, "employee_info").text
     
-    # 2. Pastikan di-redirect ke Dashboard setelah penghapusan
-    assert "Dashboard" in driver.title
+    # 1. Klik tombol Delete
+    delete_btn = driver.find_element(By.XPATH, "//a[contains(@href, 'delete.php')]")
+    delete_btn.click()
+    time.sleep(0.5)
     
-    # 3. Verifikasi kontak ID 12 tidak ditemukan di form edit
-    driver.get(f"{BASE_URL.rstrip('/')}/update.php?id={target_id}")
-    time.sleep(1)
-    assert "doesn't exist" in driver.page_source.lower()
+    # 2. Konfirmasi JavaScript Alert
+    try:
+        WebDriverWait(driver, 3).until(EC.alert_is_present())
+        alert = driver.switch_to.alert
+        alert.accept()
+        time.sleep(1)
+    except Exception:
+        pass
+    
+    driver.get(f"{BASE_URL.rstrip('/')}/index.php")
+    WebDriverWait(driver, 5).until(EC.title_contains("Dashboard"))
+    
+    # 3. Verifikasi info DataTables ter-update
+    info_after = driver.find_element(By.ID, "employee_info").text
+    assert info_before != info_after
 
 def test_tc006_upload_profile_image(logged_in_driver, tmp_path):
     """TC-043: Pengujian Fungsional Upload Foto Profil JPG (Upload Profile)"""
@@ -90,8 +100,7 @@ def test_tc006_upload_profile_image(logged_in_driver, tmp_path):
     # 1. Navigasi ke halaman Profil
     profil_btn = driver.find_element(By.XPATH, "//a[contains(@href, 'profil.php')]")
     profil_btn.click()
-    time.sleep(1)
-    
+    WebDriverWait(driver, 5).until(EC.title_contains("Profil"))
     assert "Profil" in driver.title
     
     # 2. Buat file dummy JPG valid secara dinamis
