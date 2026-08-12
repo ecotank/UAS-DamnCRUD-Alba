@@ -126,6 +126,16 @@ def create_jawaban_docx(output_path):
         run.font.bold = True
         run.font.color.rgb = RGBColor(0x2E, 0x75, 0xB6)
 
+    def add_heading_3(text):
+        p = doc.add_paragraph()
+        p.paragraph_format.space_before = Pt(8)
+        p.paragraph_format.space_after = Pt(2)
+        run = p.add_run(text)
+        run.font.name = 'Calibri'
+        run.font.size = Pt(11)
+        run.font.bold = True
+        run.font.color.rgb = RGBColor(0x1F, 0x4E, 0x78)
+
     # SOAL 1
     add_heading_1("SOAL 1: PERGESERAN PARADIGMA CI/CD DALAM PENGEMBANGAN SISTEM [BOBOT 15%]")
 
