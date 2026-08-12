@@ -37,9 +37,9 @@ jobs:
 
       - name: Initialize & Import Database
         run: |
-          mysql -h 127.0.0.1 -P 3306 -u root -proot123 -e "CREATE DATABASE IF NOT EXISTS damncrud;"
-          mysql -h 127.0.0.1 -P 3306 -u root -proot123 badcrud < db/damncrud.sql
+          mysql -h 127.0.0.1 -P 3306 -u root -proot123 -e "DROP DATABASE IF EXISTS badcrud; CREATE DATABASE badcrud; DROP DATABASE IF EXISTS damncrud; CREATE DATABASE damncrud;"
           mysql -h 127.0.0.1 -P 3306 -u root -proot123 damncrud < db/damncrud.sql
+          sed 's/`damncrud`/`badcrud`/g' db/damncrud.sql | mysql -h 127.0.0.1 -P 3306 -u root -proot123 badcrud
 
       - name: Start PHP Built-in Server
         run: |
