@@ -6,11 +6,12 @@ from selenium.webdriver.common.alert import Alert
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-BASE_URL = os.environ.get("BASE_URL", "http://host.docker.internal:8000")
+BASE_URL = os.environ.get("BASE_URL", "http://127.0.0.1:8000")
 
 def test_tc003_add_new_contact(logged_in_driver):
     """TC-012: Pengujian Fungsional Tambah Kontak Baru (Create Contact)"""
     driver = logged_in_driver
+    unique_name = f"AutoContact_{int(time.time())}"
     
     # 1. Navigasi ke form tambah kontak
     add_btn = driver.find_element(By.CLASS_NAME, "create-contact")
@@ -20,10 +21,10 @@ def test_tc003_add_new_contact(logged_in_driver):
     assert "Add new contact" in driver.title
     
     # 2. Pengisian data kontak baru
-    driver.find_element(By.ID, "name").send_keys("Budi Santoso Automation")
-    driver.find_element(By.ID, "email").send_keys("budi.auto@example.com")
+    driver.find_element(By.ID, "name").send_keys(unique_name)
+    driver.find_element(By.ID, "email").send_keys("auto.test@example.com")
     driver.find_element(By.ID, "phone").send_keys("081299887766")
-    driver.find_element(By.ID, "title").send_keys("Cryptographer Tester")
+    driver.find_element(By.ID, "title").send_keys("Automation Tester")
     
     # 3. Submit form
     driver.find_element(By.XPATH, "//input[@type='submit']").click()
@@ -32,17 +33,18 @@ def test_tc003_add_new_contact(logged_in_driver):
     # 4. Verifikasi kontak muncul di Dashboard via DataTables Search
     assert "Dashboard" in driver.title
     search_input = driver.find_element(By.XPATH, "//input[@type='search']")
-    search_input.send_keys("Budi Santoso Automation")
+    search_input.clear()
+    search_input.send_keys(unique_name)
     time.sleep(0.5)
-    assert "Budi Santoso Automation" in driver.page_source
+    assert unique_name in driver.page_source
 
 def test_tc004_update_contact(logged_in_driver):
     """TC-032: Pengujian Fungsional Perbarui Data Kontak (Update Contact)"""
     driver = logged_in_driver
+    updated_name = f"UpdatedUser_{int(time.time())}"
     
-    # 1. Klik tombol Edit pada baris pertama
-    edit_btn = driver.find_element(By.XPATH, "//a[contains(@href, 'update.php')]")
-    edit_btn.click()
+    # 1. Buka form edit kontak ID 2 agar tidak bertabrakan dengan ID 1
+    driver.get(f"{BASE_URL.rstrip('/')}/update.php?id=2")
     time.sleep(1)
     
     assert "Change contact" in driver.title
@@ -50,43 +52,36 @@ def test_tc004_update_contact(logged_in_driver):
     # 2. Ubah nama kontak
     name_field = driver.find_element(By.ID, "name")
     name_field.clear()
-    name_field.send_keys("John Does Updated")
+    name_field.send_keys(updated_name)
     
     # 3. Submit update
     driver.find_element(By.XPATH, "//input[@type='submit']").click()
     time.sleep(1)
     
-    # 4. Verifikasi data berhasil diperbarui
+    # 4. Verifikasi data berhasil diperbarui via DataTables Search
     assert "Dashboard" in driver.title
-    assert "John Does Updated" in driver.page_source
+    search_input = driver.find_element(By.XPATH, "//input[@type='search']")
+    search_input.clear()
+    search_input.send_keys(updated_name)
+    time.sleep(0.5)
+    assert updated_name in driver.page_source
 
 def test_tc005_delete_contact(logged_in_driver):
     """TC-038: Pengujian Fungsional Hapus Kontak (Delete Contact)"""
     driver = logged_in_driver
+    target_id = 12
     
-    # Hitung info DataTables sebelum penghapusan
-    info_before = driver.find_element(By.ID, "employee_info").text
-    
-    # 1. Klik tombol Delete
-    delete_btn = driver.find_element(By.XPATH, "//a[contains(@href, 'delete.php')]")
-    delete_btn.click()
-    time.sleep(0.5)
-    
-    # 2. Konfirmasi JavaScript Alert
-    try:
-        WebDriverWait(driver, 3).until(EC.alert_is_present())
-        alert = driver.switch_to.alert
-        alert.accept()
-        time.sleep(1)
-    except Exception:
-        pass
-    
-    driver.get(f"{BASE_URL.rstrip('/')}/index.php")
+    # 1. Akses halaman delete kontak ID 12
+    driver.get(f"{BASE_URL.rstrip('/')}/delete.php?id={target_id}")
     time.sleep(1)
     
-    # 3. Verifikasi info DataTables ter-update
-    info_after = driver.find_element(By.ID, "employee_info").text
-    assert info_before != info_after
+    # 2. Pastikan di-redirect ke Dashboard setelah penghapusan
+    assert "Dashboard" in driver.title
+    
+    # 3. Verifikasi kontak ID 12 tidak ditemukan di form edit
+    driver.get(f"{BASE_URL.rstrip('/')}/update.php?id={target_id}")
+    time.sleep(1)
+    assert "doesn't exist" in driver.page_source.lower()
 
 def test_tc006_upload_profile_image(logged_in_driver, tmp_path):
     """TC-043: Pengujian Fungsional Upload Foto Profil JPG (Upload Profile)"""

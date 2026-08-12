@@ -295,7 +295,6 @@ import time
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-from webdriver_manager.chrome import ChromeDriverManager
 
 BASE_URL = os.environ.get("BASE_URL", "http://127.0.0.1:8000")
 SELENIUM_HUB = os.environ.get("SELENIUM_HUB", None)
@@ -313,8 +312,12 @@ def driver():
     if SELENIUM_HUB:
         driver = webdriver.Remote(command_executor=SELENIUM_HUB, options=chrome_options)
     else:
-        service = Service(ChromeDriverManager().install())
-        driver = webdriver.Chrome(service=service, options=chrome_options)
+        try:
+            driver = webdriver.Chrome(options=chrome_options)
+        except Exception:
+            from webdriver_manager.chrome import ChromeDriverManager
+            service = Service(ChromeDriverManager().install())
+            driver = webdriver.Chrome(service=service, options=chrome_options)
 
     driver.implicitly_wait(5)
     yield driver
@@ -492,7 +495,7 @@ jobs:
         env:
           BASE_URL: http://127.0.0.1:8000
         run: |
-          pytest tests/test_damncrud.py -v -n auto"""
+          pytest tests/test_damncrud.py -v -n 2 --dist=loadfile"""
     add_code_block(doc, ci_code)
 
     add_heading_2("Bukti Link Repositori GitHub Submission:")

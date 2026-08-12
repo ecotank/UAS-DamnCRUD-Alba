@@ -60,4 +60,4 @@ jobs:
         env:
           BASE_URL: http://127.0.0.1:8000
         run: |
-          pytest tests/test_damncrud.py -v -n auto
+          pytest tests/test_damncrud.py -v -n 2 --dist=loadfile
