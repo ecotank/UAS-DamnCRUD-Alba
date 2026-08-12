@@ -1,0 +1,63 @@
+name: DamnCRUD CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master, uas2026 ]
+  pull_request:
+    branches: [ main, master, uas2026 ]
+
+jobs:
+  functional-tests:
+    name: Parallel Functional Testing (Pytest + Selenium)
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root123
+          MYSQL_DATABASE: badcrud
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup PHP Environment
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: pdo, pdo_mysql, mysqli
+
+      - name: Initialize Database
+        run: |
+          mysql -h 127.0.0.1 -u root -proot123 -e "CREATE DATABASE IF NOT EXISTS damncrud;"
+          mysql -h 127.0.0.1 -u root -proot123 badcrud < db/damncrud.sql
+          mysql -h 127.0.0.1 -u root -proot123 damncrud < db/damncrud.sql
+
+      - name: Start PHP Web Server
+        run: |
+          php -S 127.0.0.1:8000 &
+          sleep 2
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Test Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-xdist selenium webdriver-manager
+
+      - name: Run Pytest Parallel Functional Tests
+        env:
+          BASE_URL: http://127.0.0.1:8000
+        run: |
+          pytest tests/test_damncrud.py -v -n auto

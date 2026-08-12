@@ -24,6 +24,7 @@
         if ($stmt->rowCount() > 0) {
             $_SESSION['user'] = $user;
             header("location: index.php");
+            exit();
         } else {
             $notif = "Damn, wrong credentials!!";
         }
