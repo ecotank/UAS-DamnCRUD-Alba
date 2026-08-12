@@ -20,13 +20,13 @@ jobs:
         ports:
           - 3306:3306
         options: >-
-          --health-cmd="mysqladmin ping"
+          --health-cmd="mysqladmin ping --silent"
           --health-interval=10s
           --health-timeout=5s
-          --health-retries=3
+          --health-retries=5
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout Repository Code
         uses: actions/checkout@v4
 
       - name: Setup PHP Environment
@@ -35,23 +35,23 @@ jobs:
           php-version: '8.2'
           extensions: pdo, pdo_mysql, mysqli
 
-      - name: Initialize Database
+      - name: Initialize & Import Database
         run: |
-          mysql -h 127.0.0.1 -u root -proot123 -e "CREATE DATABASE IF NOT EXISTS damncrud;"
-          mysql -h 127.0.0.1 -u root -proot123 badcrud < db/damncrud.sql
-          mysql -h 127.0.0.1 -u root -proot123 damncrud < db/damncrud.sql
+          mysql -h 127.0.0.1 -P 3306 -u root -proot123 -e "CREATE DATABASE IF NOT EXISTS damncrud;"
+          mysql -h 127.0.0.1 -P 3306 -u root -proot123 badcrud < db/damncrud.sql
+          mysql -h 127.0.0.1 -P 3306 -u root -proot123 damncrud < db/damncrud.sql
 
-      - name: Start PHP Web Server
+      - name: Start PHP Built-in Server
         run: |
           php -S 127.0.0.1:8000 &
-          sleep 2
+          sleep 3
 
-      - name: Setup Python
+      - name: Setup Python Environment
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: Install Test Dependencies
+      - name: Install Testing Dependencies
         run: |
           python -m pip install --upgrade pip
           pip install pytest pytest-xdist selenium webdriver-manager

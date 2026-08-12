@@ -6,8 +6,8 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 
-BASE_URL = os.environ.get("BASE_URL", "http://host.docker.internal:8000")
-SELENIUM_HUB = os.environ.get("SELENIUM_HUB", "http://127.0.0.1:4444/wd/hub")
+BASE_URL = os.environ.get("BASE_URL", "http://127.0.0.1:8000")
+SELENIUM_HUB = os.environ.get("SELENIUM_HUB", None)
 
 @pytest.fixture(scope="function")
 def driver():
@@ -19,16 +19,14 @@ def driver():
     chrome_options.add_argument("--remote-allow-origins=*")
     chrome_options.add_argument("--window-size=1920,1080")
 
-    try:
+    if SELENIUM_HUB:
         driver = webdriver.Remote(command_executor=SELENIUM_HUB, options=chrome_options)
-    except Exception:
+    else:
         service = Service(ChromeDriverManager().install())
         driver = webdriver.Chrome(service=service, options=chrome_options)
 
     driver.implicitly_wait(5)
-
     yield driver
-
     driver.quit()
 
 @pytest.fixture(scope="function")
@@ -36,13 +34,9 @@ def logged_in_driver(driver):
     """Helper fixture to handle login before each functional test."""
     target_url = BASE_URL.rstrip('/')
     driver.get(f"{target_url}/login.php")
-    username_input = driver.find_element("id", "inputUsername")
-    password_input = driver.find_element("id", "inputPassword")
-    submit_btn = driver.find_element("xpath", "//button[@type='submit']")
-
-    username_input.send_keys("admin")
-    password_input.send_keys("nimda666!")
-    submit_btn.click()
+    driver.find_element("id", "inputUsername").send_keys("admin")
+    driver.find_element("id", "inputPassword").send_keys("nimda666!")
+    driver.find_element("xpath", "//button[@type='submit']").click()
 
     time.sleep(1)
     assert "Dashboard" in driver.title or "Howdy" in driver.page_source

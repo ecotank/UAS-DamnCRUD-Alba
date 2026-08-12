@@ -297,8 +297,8 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 
-BASE_URL = os.environ.get("BASE_URL", "http://host.docker.internal:8000")
-SELENIUM_HUB = os.environ.get("SELENIUM_HUB", "http://127.0.0.1:4444/wd/hub")
+BASE_URL = os.environ.get("BASE_URL", "http://127.0.0.1:8000")
+SELENIUM_HUB = os.environ.get("SELENIUM_HUB", None)
 
 @pytest.fixture(scope="function")
 def driver():
@@ -306,12 +306,13 @@ def driver():
     chrome_options.add_argument("--headless=new")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--remote-allow-origins=*")
     chrome_options.add_argument("--window-size=1920,1080")
 
-    try:
+    if SELENIUM_HUB:
         driver = webdriver.Remote(command_executor=SELENIUM_HUB, options=chrome_options)
-    except Exception:
+    else:
         service = Service(ChromeDriverManager().install())
         driver = webdriver.Chrome(service=service, options=chrome_options)
 
