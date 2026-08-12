@@ -496,7 +496,7 @@ jobs:
 
     add_heading_2("Bukti Link Repositori GitHub Submission:")
     p_link = doc.add_paragraph()
-    run_link = p_link.add_run("https://github.com/hermanka/DamnCRUD/tree/uas2026")
+    run_link = p_link.add_run("https://github.com/ecotank/UAS-DamnCRUD-Alba")
     run_link.font.bold = True
     run_link.font.color.rgb = RGBColor(0x05, 0x63, 0xC1)
     run_link.font.underline = True
