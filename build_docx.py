@@ -281,12 +281,67 @@ def create_jawaban_docx(output_path):
 
     doc.add_paragraph()
 
-    # SOAL 3
     add_heading_1("SOAL 3: LANGKAH-LANGKAH & SKRIP OTOMASI SELENIUM PYTHON [BOBOT 30%]")
 
     p = doc.add_paragraph()
     p.paragraph_format.space_after = Pt(6)
-    p.add_run("Pengujian fungsional diotomatisasi menggunakan Python 3.11, Selenium WebDriver (Headless Chrome), dan Pytest. Lima test case terpilih diuji secara terintegrasi:")
+    p.add_run("Pengujian fungsional diotomatisasi menggunakan Python 3.11, Selenium WebDriver (Headless Chrome), dan Pytest. Lima test case terpilih diuji secara terintegrasi dengan rincian langkah-langkah otomasi sebagai berikut:")
+
+    add_heading_2("Rincian Langkah-Langkah Otomasi 5 Test Case Terpilih:")
+
+    steps_list = [
+        ("1. TC-012: Tambah Kontak Baru Valid (test_tc012_add_new_contact)", [
+            "Langkah 1: Login otomatis via fixture logged_in_driver lalu buka Dashboard (index.php).",
+            "Langkah 2: Klik tombol Create Contact (By.CLASS_NAME, 'create-contact').",
+            "Langkah 3: Tunggu hingga judul halaman memuat 'Add new contact' (WebDriverWait).",
+            "Langkah 4: Buat string nama unik ber-timestamp (AutoContact_TIMESTAMP) untuk isolasi data.",
+            "Langkah 5: Isi form input: Name (#name), Email (#email), Phone (#phone), dan Title (#title).",
+            "Langkah 6: Klik tombol Save (//input[@type='submit']) dan tunggu redirect ke Dashboard.",
+            "Langkah 7: Ketik nama unik pada input pencarian DataTables (//input[@type='search']).",
+            "Langkah 8: Verifikasi (assert) kontak baru tampil di tabel (assert unique_name in driver.page_source)."
+        ]),
+        ("2. TC-032: Perbarui Data Kontak Valid (test_tc032_update_contact)", [
+            "Langkah 1: Dari Dashboard, klik tombol Edit (//a[contains(@href, 'update.php')]) pada baris kontak.",
+            "Langkah 2: Tunggu hingga judul halaman memuat 'Change contact'.",
+            "Langkah 3: Bersihkan field Name (name_field.clear()) dan masukkan nama baru (UpdatedUser_TIMESTAMP).",
+            "Langkah 4: Klik tombol Update (//input[@type='submit']) untuk menyimpan perubahan.",
+            "Langkah 5: Tunggu redirect kembali ke Dashboard (index.php).",
+            "Langkah 6: Cari nama baru di DataTables search box dan verifikasi data terbarui (assert updated_name in driver.page_source)."
+        ]),
+        ("3. TC-038: Hapus Data Kontak dengan Konfirmasi (test_tc038_delete_contact)", [
+            "Langkah 1: Buat kontak khusus sementara (DeleteMe_TIMESTAMP) agar pengujian terisolasi total.",
+            "Langkah 2: Cari kontak sementara tersebut via DataTables search box.",
+            "Langkah 3: Klik tombol Delete (//a[contains(@href, 'delete.php')]).",
+            "Langkah 4: Tangkap dialog JavaScript Alert menggunakan WebDriverWait(driver, 3).until(EC.alert_is_present()).",
+            "Langkah 5: Eksekusi alert.accept() untuk mengonfirmasi penghapusan (klik OK).",
+            "Langkah 6: Redirect ke Dashboard index.php dan tunggu render halaman selesai.",
+            "Langkah 7: Cari kembali nama DeleteMe_TIMESTAMP di DataTables search box.",
+            "Langkah 8: Verifikasi (assert) kontak tersebut terhapus (assert unique_delete_name not in driver.page_source)."
+        ]),
+        ("4. TC-043: Unggah Foto Profil Format JPG (test_tc043_upload_profile_image)", [
+            "Langkah 1: Klik menu navigasi Profil (//a[contains(@href, 'profil.php')]).",
+            "Langkah 2: Tunggu hingga judul halaman memuat 'Profil'.",
+            "Langkah 3: Buat berkas dummy .jpg valid menggunakan header binary JPEG (b'\\xFF\\xD8\\xFF\\xE0...') via tmp_path.",
+            "Langkah 4: Masukkan path berkas ke input file (#formFile.send_keys(str(sample_jpg))).",
+            "Langkah 5: Klik tombol Change (//button[@type='submit']).",
+            "Langkah 6: Verifikasi pengunggahan sukses tanpa error (assert 'Ekstensi tidak diijinkan' not in driver.page_source)."
+        ]),
+        ("5. TC-008: Submission Form VPage (test_tc008_vpage_functional_submission)", [
+            "Langkah 1: Klik menu navigasi VPage (//a[contains(@href, 'vpage.php')]).",
+            "Langkah 2: Verifikasi halaman VPage terbuka (assert 'Dummy Page XSS Detect' in driver.page_source).",
+            "Langkah 3: Masukkan string teks 'Testing Functional Output' pada field input (input[name='thing']).",
+            "Langkah 4: Klik tombol Submit (input[name='submit']).",
+            "Langkah 5: Verifikasi teks terefleksi pada elemen output halaman (assert 'Your thing is Testing Functional Output' in driver.page_source)."
+        ])
+    ]
+
+    for title, steps in steps_list:
+        add_heading_3(title)
+        for st in steps:
+            p_s = doc.add_paragraph(st, style='List Bullet')
+            p_s.paragraph_format.space_after = Pt(2)
+
+    doc.add_paragraph()
 
     add_heading_2("Skrip Fixture Pytest (tests/conftest.py):")
     conftest_code = """import pytest
