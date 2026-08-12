@@ -68,16 +68,30 @@ def test_tc004_update_contact(logged_in_driver):
 def test_tc005_delete_contact(logged_in_driver):
     """TC-038: Pengujian Fungsional Hapus Kontak (Delete Contact)"""
     driver = logged_in_driver
+    unique_delete_name = f"DeleteMe_{int(time.time())}"
     
-    # Hitung info DataTables sebelum penghapusan
-    info_before = driver.find_element(By.ID, "employee_info").text
+    # 1. Tambah kontak khusus untuk dihapus (Isolasi total)
+    driver.find_element(By.CLASS_NAME, "create-contact").click()
+    WebDriverWait(driver, 5).until(EC.title_contains("Add new contact"))
+    driver.find_element(By.ID, "name").send_keys(unique_delete_name)
+    driver.find_element(By.ID, "email").send_keys("delete.me@example.com")
+    driver.find_element(By.ID, "phone").send_keys("0812000000")
+    driver.find_element(By.ID, "title").send_keys("Temp Contact")
+    driver.find_element(By.XPATH, "//input[@type='submit']").click()
+    WebDriverWait(driver, 5).until(EC.title_contains("Dashboard"))
     
-    # 1. Klik tombol Delete
+    # 2. Cari kontak khusus tersebut via DataTables Search
+    search_input = driver.find_element(By.XPATH, "//input[@type='search']")
+    search_input.clear()
+    search_input.send_keys(unique_delete_name)
+    time.sleep(0.5)
+    
+    # 3. Klik tombol Delete pada kontak tersebut
     delete_btn = driver.find_element(By.XPATH, "//a[contains(@href, 'delete.php')]")
     delete_btn.click()
     time.sleep(0.5)
     
-    # 2. Konfirmasi JavaScript Alert
+    # 4. Konfirmasi JavaScript Alert
     try:
         WebDriverWait(driver, 3).until(EC.alert_is_present())
         alert = driver.switch_to.alert
@@ -89,9 +103,12 @@ def test_tc005_delete_contact(logged_in_driver):
     driver.get(f"{BASE_URL.rstrip('/')}/index.php")
     WebDriverWait(driver, 5).until(EC.title_contains("Dashboard"))
     
-    # 3. Verifikasi info DataTables ter-update
-    info_after = driver.find_element(By.ID, "employee_info").text
-    assert info_before != info_after
+    # 5. Verifikasi nama tersebut sudah terhapus (tidak ada di DataTables search)
+    search_input = driver.find_element(By.XPATH, "//input[@type='search']")
+    search_input.clear()
+    search_input.send_keys(unique_delete_name)
+    time.sleep(0.5)
+    assert unique_delete_name not in driver.page_source
 
 def test_tc006_upload_profile_image(logged_in_driver, tmp_path):
     """TC-043: Pengujian Fungsional Upload Foto Profil JPG (Upload Profile)"""
