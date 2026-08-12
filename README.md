@@ -45,6 +45,9 @@ Diotomatisasi menggunakan Python 3.11 dan Selenium WebDriver (Chrome Headless):
   4. `test_tc043_upload_profile_image`: Otomasi pengunggahan berkas profil JPG dinamis.
   5. `test_tc008_vpage_functional_submission`: Otomasi form submission & verifikasi perolehan output.
  
+     <img width="1250" height="597" alt="Screenshot 2026-08-12 101348" src="https://github.com/user-attachments/assets/f9fc3e83-ca9b-44e7-9cb4-b518c7664f67" />
+
+ 
      <img width="923" height="312" alt="Screenshot 2026-08-12 095857" src="https://github.com/user-attachments/assets/f6195dae-675e-400a-83c7-d24418056249" />
 
 ### C. Continuous Integration Pipeline (GitHub Actions)
