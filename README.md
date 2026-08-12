@@ -1,6 +1,6 @@
-# DamnCRUD - UAS Pengujian Perangkat Lunak (4 RPLK)
+# DamnCRUD - UAS Pengujian Perangkat Lunak (3 RPLK)
 
-Repositori ini merupakan hasil pengerjaan **Ujian Akhir Semester (UAS) Mata Kuliah Pengujian Perangkat Lunak**, Program Studi Rekayasa Perangkat Lunak Kripto (4 RPLK), Politeknik Siber dan Sandi Negara (T.A. 2025/2026).
+Repositori ini merupakan hasil pengerjaan **Ujian Akhir Semester (UAS) Mata Kuliah Pengujian Perangkat Lunak**, Program Studi Rekayasa Perangkat Lunak Kripto (3 RPLK), Politeknik Siber dan Sandi Negara (T.A. 2025/2026).
 
 **URL Repositori GitHub Submission**: [https://github.com/ecotank/UAS-DamnCRUD-Alba](https://github.com/ecotank/UAS-DamnCRUD-Alba)
 
@@ -97,4 +97,4 @@ Berikut adalah ringkasan temuan pengujian fungsional pada aplikasi kode asli:
    ```
 
 ---
-*Dikembangkan oleh Mahasiswa Rekayasa Perangkat Lunak Kripto (4 RPLK) - Politeknik Siber dan Sandi Negara.*
+*Dikembangkan oleh Mahasiswa Rekayasa Perangkat Lunak Kripto (III RPLK) - Politeknik Siber dan Sandi Negara.*
