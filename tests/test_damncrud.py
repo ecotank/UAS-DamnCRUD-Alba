@@ -8,7 +8,7 @@ from selenium.webdriver.support import expected_conditions as EC
 
 BASE_URL = os.environ.get("BASE_URL", "http://127.0.0.1:8000")
 
-def test_tc003_add_new_contact(logged_in_driver):
+def test_tc012_add_new_contact(logged_in_driver):
     """TC-012: Pengujian Fungsional Tambah Kontak Baru (Create Contact)"""
     driver = logged_in_driver
     unique_name = f"AutoContact_{int(time.time())}"
@@ -37,7 +37,7 @@ def test_tc003_add_new_contact(logged_in_driver):
     time.sleep(0.5)
     assert unique_name in driver.page_source
 
-def test_tc004_update_contact(logged_in_driver):
+def test_tc032_update_contact(logged_in_driver):
     """TC-032: Pengujian Fungsional Perbarui Data Kontak (Update Contact)"""
     driver = logged_in_driver
     updated_name = f"UpdatedUser_{int(time.time())}"
@@ -65,7 +65,7 @@ def test_tc004_update_contact(logged_in_driver):
     time.sleep(0.5)
     assert updated_name in driver.page_source
 
-def test_tc005_delete_contact(logged_in_driver):
+def test_tc038_delete_contact(logged_in_driver):
     """TC-038: Pengujian Fungsional Hapus Kontak (Delete Contact)"""
     driver = logged_in_driver
     unique_delete_name = f"DeleteMe_{int(time.time())}"
@@ -110,7 +110,7 @@ def test_tc005_delete_contact(logged_in_driver):
     time.sleep(0.5)
     assert unique_delete_name not in driver.page_source
 
-def test_tc006_upload_profile_image(logged_in_driver, tmp_path):
+def test_tc043_upload_profile_image(logged_in_driver, tmp_path):
     """TC-043: Pengujian Fungsional Upload Foto Profil JPG (Upload Profile)"""
     driver = logged_in_driver
     
@@ -136,7 +136,7 @@ def test_tc006_upload_profile_image(logged_in_driver, tmp_path):
     assert "Profil" in driver.title
     assert "Ekstensi tidak diijinkan" not in driver.page_source
 
-def test_tc007_vpage_functional_submission(logged_in_driver):
+def test_tc008_vpage_functional_submission(logged_in_driver):
     """TC-008: Pengujian Fungsional Form Submission VPage"""
     driver = logged_in_driver
     

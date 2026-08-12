@@ -346,7 +346,7 @@ from selenium.webdriver.support import expected_conditions as EC
 
 BASE_URL = os.environ.get("BASE_URL", "http://127.0.0.1:8000")
 
-def test_tc003_add_new_contact(logged_in_driver):
+def test_tc012_add_new_contact(logged_in_driver):
     driver = logged_in_driver
     unique_name = f"AutoContact_{int(time.time())}"
     
@@ -370,7 +370,7 @@ def test_tc003_add_new_contact(logged_in_driver):
     time.sleep(0.5)
     assert unique_name in driver.page_source
 
-def test_tc004_update_contact(logged_in_driver):
+def test_tc032_update_contact(logged_in_driver):
     driver = logged_in_driver
     updated_name = f"UpdatedUser_{int(time.time())}"
     
@@ -393,9 +393,23 @@ def test_tc004_update_contact(logged_in_driver):
     time.sleep(0.5)
     assert updated_name in driver.page_source
 
-def test_tc005_delete_contact(logged_in_driver):
+def test_tc038_delete_contact(logged_in_driver):
     driver = logged_in_driver
-    info_before = driver.find_element(By.ID, "employee_info").text
+    unique_delete_name = f"DeleteMe_{int(time.time())}"
+    
+    driver.find_element(By.CLASS_NAME, "create-contact").click()
+    WebDriverWait(driver, 5).until(EC.title_contains("Add new contact"))
+    driver.find_element(By.ID, "name").send_keys(unique_delete_name)
+    driver.find_element(By.ID, "email").send_keys("delete.me@example.com")
+    driver.find_element(By.ID, "phone").send_keys("0812000000")
+    driver.find_element(By.ID, "title").send_keys("Temp Contact")
+    driver.find_element(By.XPATH, "//input[@type='submit']").click()
+    WebDriverWait(driver, 5).until(EC.title_contains("Dashboard"))
+    
+    search_input = driver.find_element(By.XPATH, "//input[@type='search']")
+    search_input.clear()
+    search_input.send_keys(unique_delete_name)
+    time.sleep(0.5)
     
     delete_btn = driver.find_element(By.XPATH, "//a[contains(@href, 'delete.php')]")
     delete_btn.click()
@@ -412,10 +426,13 @@ def test_tc005_delete_contact(logged_in_driver):
     driver.get(f"{BASE_URL.rstrip('/')}/index.php")
     WebDriverWait(driver, 5).until(EC.title_contains("Dashboard"))
     
-    info_after = driver.find_element(By.ID, "employee_info").text
-    assert info_before != info_after
+    search_input = driver.find_element(By.XPATH, "//input[@type='search']")
+    search_input.clear()
+    search_input.send_keys(unique_delete_name)
+    time.sleep(0.5)
+    assert unique_delete_name not in driver.page_source
 
-def test_tc006_upload_profile_image(logged_in_driver, tmp_path):
+def test_tc043_upload_profile_image(logged_in_driver, tmp_path):
     driver = logged_in_driver
     profil_btn = driver.find_element(By.XPATH, "//a[contains(@href, 'profil.php')]")
     profil_btn.click()
@@ -433,7 +450,7 @@ def test_tc006_upload_profile_image(logged_in_driver, tmp_path):
     assert "Profil" in driver.title
     assert "Ekstensi tidak diijinkan" not in driver.page_source
 
-def test_tc007_vpage_functional_submission(logged_in_driver):
+def test_tc008_vpage_functional_submission(logged_in_driver):
     driver = logged_in_driver
     vpage_btn = driver.find_element(By.XPATH, "//a[contains(@href, 'vpage.php')]")
     vpage_btn.click()
